@@ -339,7 +339,7 @@
         <button class="notify-button" id="notifyButton">Test Notification</button>
     </div>
     <div class="completion-message" id="completionMessage">You reached your goal!</div>
-    <script>
+  <script>
         const smallCups = document.querySelectorAll(".cup-small");
         const liters = document.getElementById("liters");
         const percentage = document.getElementById("percentage");
@@ -419,6 +419,7 @@
         const notifyButton = document.getElementById("notifyButton");
 
         const showNotification = () => {
+            console.log("Notification function triggered.");
             if (!("Notification" in window)) {
                 console.log("This browser does not support desktop notifications.");
                 alert("This browser does not support desktop notifications.");
@@ -426,13 +427,16 @@
             }
 
             if (Notification.permission === "granted") {
+                console.log("Notification permission granted.");
                 new Notification("Hydration Tracker", {
                     body: "This is your notification test!",
                     icon: "https://image.shutterstock.com/image-vector/water-icon-template-design-260nw-1387025292.jpg"
                 });
             } else if (Notification.permission === "default") {
+                console.log("Requesting notification permission.");
                 Notification.requestPermission().then(permission => {
                     if (permission === "granted") {
+                        console.log("Notification permission granted after request.");
                         showNotification();
                     } else {
                         console.log("Notification permission denied.");
