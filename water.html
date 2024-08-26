@@ -293,6 +293,23 @@
         .percentage.completed {
             animation: celebrate 0.5s ease-in-out;
         }
+
+        /* Notification Button */
+        .notify-button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            color: white;
+            background-color: var(--accent-color);
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .notify-button:hover {
+            background-color: var(--secondary-color);
+        }
     </style>
 </head>
 
@@ -309,112 +326,101 @@
         </div>
         <p class="text">Select how many glasses of water you've had:</p>
         <div class="cups">
-            <div class="cup cup-small"><span>250 ml</span></div>
-            <div class="cup cup-small"><span>250 ml</span></div>
-            <div class="cup cup-small"><span>250 ml</span></div>
-            <div class="cup cup-small"><span>250 ml</span></div>
-            <div class="cup cup-small"><span>250 ml</span></div>
-            <div class="cup cup-small"><span>250 ml</span></div>
-            <div class="cup cup-small"><span>250 ml</span></div>
-            <div class="cup cup-small"><span>250 ml</span></div>
+            <div class="cup cup-small">250 ml</div>
+            <div class="cup cup-small">250 ml</div>
+            <div class="cup cup-small">250 ml</div>
+            <div class="cup cup-small">250 ml</div>
+            <div class="cup cup-small">250 ml</div>
+            <div class="cup cup-small">250 ml</div>
+            <div class="cup cup-small">250 ml</div>
+            <div class="cup cup-small">250 ml</div>
         </div>
-        <!-- Add a button to test the notification -->
-        <button id="testNotificationButton">Test Notification</button>
+        <!-- Notification Test Button -->
+        <button class="notify-button" id="notifyButton">Test Notification</button>
     </div>
-    <div class="completion-message" id="completion-message">Congratulations! You've reached your goal!</div>
+    <div class="completion-message" id="completionMessage">You reached your goal!</div>
     <script>
-        const smallCups = document.querySelectorAll('.cup-small');
-        const liters = document.getElementById('liters');
-        const percentage = document.getElementById('percentage');
-        const remained = document.getElementById('remained');
-        const completionMessage = document.getElementById('completion-message');
-        const totalCups = smallCups.length;
-        const totalWater = 2; // 2 liters
-        let drinkCount = 0;
+        const smallCups = document.querySelectorAll(".cup-small");
+        const liters = document.getElementById("liters");
+        const percentage = document.getElementById("percentage");
+        const remained = document.getElementById("remained");
+        const completionMessage = document.getElementById("completionMessage");
+        const notifyButton = document.getElementById("notifyButton");
 
-        smallCups.forEach((cup, index) => {
-            cup.addEventListener('click', () => {
-                highlightCups(index);
-                drinkCount = index + 1;
-                checkCompletion();
-            });
-        });
-
-        function highlightCups(index) {
-            if (smallCups[index].classList.contains('full') && !smallCups[index].nextElementSibling.classList.contains('full')) {
-                index--;
+        const loadSavedData = () => {
+            const savedDate = localStorage.getItem('waterTrackerDate');
+            const currentDate = new Date().toDateString();
+            if (savedDate !== currentDate) {
+                localStorage.setItem('waterTrackerDate', currentDate);
+                localStorage.setItem('fullCups', '0');
+                return 0;
             }
-            smallCups.forEach((cup, idx) => {
-                if (idx <= index) {
-                    cup.classList.add('full');
-                } else {
-                    cup.classList.remove('full');
-                }
-            });
-            updateCupStatus();
-        }
+            return parseInt(localStorage.getItem('fullCups') || '0');
+        };
 
-        function updateCupStatus() {
-            const fullCups = document.querySelectorAll('.cup-small.full').length;
-            const totalLiters = totalWater * (fullCups / totalCups);
+        const updateBigCup = () => {
+            const fullCups = document.querySelectorAll(".cup-small.full").length;
+            const totalCups = smallCups.length;
 
             if (fullCups === 0) {
+                percentage.style.visibility = "hidden";
                 percentage.style.height = 0;
-                percentage.innerText = '';
             } else {
-                percentage.style.height = `${(fullCups / totalCups) * 100}%`;
-                percentage.innerText = `${(fullCups / totalCups) * 100}%`;
+                percentage.style.visibility = "visible";
+                percentage.style.height = `${(fullCups / totalCups) * 300}px`;
+                percentage.innerText = `${Math.round((fullCups / totalCups) * 100)}%`;
             }
 
             if (fullCups === totalCups) {
-                remained.style.visibility = 'hidden';
+                remained.style.visibility = "hidden";
                 remained.style.height = 0;
-            } else {
-                remained.style.visibility = 'visible';
-                liters.innerText = `${(totalWater - totalLiters).toFixed(2)} L`;
-            }
-        }
-
-        function checkCompletion() {
-            if (drinkCount === totalCups) {
-                completionMessage.classList.add('show');
                 percentage.classList.add('completed');
-                setTimeout(() => {
-                    completionMessage.classList.remove('show');
-                    percentage.classList.remove('completed');
-                }, 3000);
+                completionMessage.classList.add('show');
+                setTimeout(() => completionMessage.classList.remove('show'), 3000);
+            } else {
+                remained.style.visibility = "visible";
+                liters.innerText = `${2 - (250 * fullCups) / 1000}L`;
+                percentage.classList.remove('completed');
+                completionMessage.classList.remove('show');
             }
-        }
+        };
 
-        // Notification functionality
-        function showNotification() {
+        const highlightCups = (index) => {
+            if (index === 7 && smallCups[index].classList.contains("full")) index--;
+            if (smallCups[index].classList.contains("full") && !smallCups[index].nextElementSibling?.classList.contains("full")) {
+                index--;
+            }
+            smallCups.forEach((cup, index2) => {
+                if (index2 <= index) cup.classList.add("full");
+                else cup.classList.remove("full");
+            });
+            localStorage.setItem('fullCups', (index + 1).toString());
+            updateBigCup();
+        };
+
+        smallCups.forEach((cup, index) => cup.addEventListener("click", () => highlightCups(index)));
+
+        const savedFullCups = loadSavedData();
+        highlightCups(savedFullCups - 1);
+        updateBigCup();
+
+        // Notification Setup
+        const showNotification = () => {
             if (Notification.permission === "granted") {
-                const notification = new Notification("Hydration Reminder", {
-                    body: "Time to drink water!",
-                    icon: "https://illustoon.com/photo/4506.png"
+                new Notification("Hydration Tracker", {
+                    body: "This is your notification test!",
+                    icon: "https://image.shutterstock.com/image-vector/water-icon-template-design-260nw-1387025292.jpg"
                 });
-            }
-        }
-
-        function requestNotificationPermission() {
-            if (Notification.permission !== "granted") {
+            } else if (Notification.permission !== "denied") {
                 Notification.requestPermission().then(permission => {
                     if (permission === "granted") {
-                        setInterval(() => {
-                            if (drinkCount < totalCups) {
-                                showNotification();
-                            }
-                        }, 2 * 60 * 60 * 1000); // Every 2 hours
+                        showNotification();
                     }
                 });
             }
-        }
+        };
 
-        // Test Notification Button
-        const testNotificationButton = document.getElementById('testNotificationButton');
-        testNotificationButton.addEventListener('click', showNotification);
-
-        requestNotificationPermission();
+        notifyButton.addEventListener("click", showNotification);
     </script>
 </body>
 
