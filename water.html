@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hydration Tracker Pro</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap');
+
+        :root {
+            --primary-color: #4da6ff;
+            --secondary-color: #0066cc;
+            --background-color: #e6f2ff;
+            --text-color: #003366;
+            --accent-color: #ff9900;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+            padding: 20px;
+        }
+
+        .container {
+            background-color: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            text-align: center;
+            max-width: 450px;
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, var(--primary-color) 0%, transparent 70%);
+            opacity: 0.1;
+            animation: ripple 15s infinite linear;
+        }
+
+        @keyframes ripple {
+            0% {
+                transform: translate(0, 0);
+            }
+
+            100% {
+                transform: translate(-50%, -50%);
+            }
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            color: var(--secondary-color);
+            font-size: 2.5em;
+            font-weight: 700;
+        }
+
+        .goal {
+            font-size: 1.2em;
+            margin-bottom: 30px;
+            color: var(--accent-color);
+            font-weight: 500;
+        }
+
+        .cup-container {
+            position: relative;
+            margin: 0 auto 30px;
+            width: 180px;
+            height: 330px;
+        }
+
+        .cup {
+            background-color: var(--primary-color);
+            border: 6px solid var(--secondary-color);
+            color: white;
+            border-radius: 0 0 70px 70px;
+            height: 300px;
+            width: 180px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transition: 0.3s ease;
+            position: absolute;
+            bottom: 0;
+        }
+
+        .cup::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(0deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0) 100%);
+            animation: waterWave 3s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        @keyframes waterWave {
+
+            0%,
+            100% {
+                transform: translate(0, 0) rotate(0deg);
+            }
+
+            25% {
+                transform: translate(-10px, 0) rotate(-5deg);
+            }
+
+            75% {
+                transform: translate(10px, 0) rotate(5deg);
+            }
+        }
+
+        .cup-lid {
+            width: 200px;
+            height: 40px;
+            background-color: var(--secondary-color);
+            border-radius: 100px 100px 0 0;
+            position: absolute;
+            top: -10px;
+            left: -10px;
+        }
+
+        .remained {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            flex: 1;
+            transition: 0.3s ease;
+        }
+
+        .remained span {
+            font-size: 30px;
+            font-weight: bold;
+        }
+
+        .remained small {
+            font-size: 14px;
+        }
+
+        .percentage {
+            background-color: var(--secondary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 30px;
+            height: 0;
+            transition: 0.3s ease;
+        }
+
+        .text {
+            margin-bottom: 20px;
+            font-size: 1.1em;
+            color: var(--text-color);
+        }
+
+        .cups {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .cup.cup-small {
+            height: 95px;
+            width: 50px;
+            border-radius: 0 0 15px 15px;
+            background-color: rgba(255, 255, 255, 0.9);
+            cursor: pointer;
+            font-size: 14px;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            transition: 0.3s ease;
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cup.cup-small::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 0;
+            background-color: var(--primary-color);
+            transition: 0.3s ease;
+        }
+
+        .cup.cup-small.full::before {
+            height: 100%;
+        }
+
+        .cup.cup-small span {
+            position: relative;
+            z-index: 1;
+            transition: 0.3s ease;
+        }
+
+        .cup.cup-small.full span {
+            color: white;
+        }
+
+        .cup.cup-small:hover {
+            transform: translateY(-5px);
+        }
+
+        .completion-message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: var(--accent-color);
+            color: white;
+            padding: 20px 30px;
+            border-radius: 50px;
+            font-size: 24px;
+            font-weight: bold;
+            opacity: 0;
+            transition: opacity 0.5s ease, transform 0.5s ease;
+            z-index: 1000;
+        }
+
+        .completion-message.show {
+            opacity: 1;
+            animation: bounce 0.5s ease-in-out;
+        }
+
+        @keyframes bounce {
+
+            0%,
+            20%,
+            50%,
+            80%,
+            100% {
+                transform: translate(-50%, -50%);
+            }
+
+            40% {
+                transform: translate(-50%, -60%);
+            }
+
+            60% {
+                transform: translate(-50%, -55%);
+            }
+        }
+
+        @keyframes celebrate {
+
+            0%,
+            100% {
+                transform: scale(1) rotate(0deg);
+            }
+
+            25% {
+                transform: scale(1.1) rotate(-5deg);
+            }
+
+            75% {
+                transform: scale(1.1) rotate(5deg);
+            }
+        }
+
+        .percentage.completed {
+            animation: celebrate 0.5s ease-in-out;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Hydration Tracker</h1>
+        <p class="goal">Goal: 2 liters</p>
+        <div class="cup-container">
+            <div class="cup-lid"></div>
+            <div class="cup">
+                <div class="remained" id="remained"> <span id="liters"></span> <small>Remained</small> </div>
+                <div class="percentage" id="percentage"></div>
+            </div>
+        </div>
+        <p class="text">Select how many glasses of water you've had:</p>
+        <div class="cups">
+            <div class="cup cup-small"><span>250 ml</span></div>
+            <div class="cup cup-small"><span>250 ml</span></div>
+            <div class="cup cup-small"><span>250 ml</span></div>
+            <div class="cup cup-small"><span>250 ml</span></div>
+            <div class="cup cup-small"><span>250 ml</span></div>
+            <div class="cup cup-small"><span>250 ml</span></div>
+            <div class="cup cup-small"><span>250 ml</span></div>
+            <div class="cup cup-small"><span>250 ml</span></div>
+        </div>
+        <!-- Add a button to test the notification -->
+        <button id="testNotificationButton">Test Notification</button>
+    </div>
+    <div class="completion-message" id="completion-message">Congratulations! You've reached your goal!</div>
+    <script>
+        const smallCups = document.querySelectorAll('.cup-small');
+        const liters = document.getElementById('liters');
+        const percentage = document.getElementById('percentage');
+        const remained = document.getElementById('remained');
+        const completionMessage = document.getElementById('completion-message');
+        const totalCups = smallCups.length;
+        const totalWater = 2; // 2 liters
+        let drinkCount = 0;
+
+        smallCups.forEach((cup, index) => {
+            cup.addEventListener('click', () => {
+                highlightCups(index);
+                drinkCount = index + 1;
+                checkCompletion();
+            });
+        });
+
+        function highlightCups(index) {
+            if (smallCups[index].classList.contains('full') && !smallCups[index].nextElementSibling.classList.contains('full')) {
+                index--;
+            }
+            smallCups.forEach((cup, idx) => {
+                if (idx <= index) {
+                    cup.classList.add('full');
+                } else {
+                    cup.classList.remove('full');
+                }
+            });
+            updateCupStatus();
+        }
+
+        function updateCupStatus() {
+            const fullCups = document.querySelectorAll('.cup-small.full').length;
+            const totalLiters = totalWater * (fullCups / totalCups);
+
+            if (fullCups === 0) {
+                percentage.style.height = 0;
+                percentage.innerText = '';
+            } else {
+                percentage.style.height = `${(fullCups / totalCups) * 100}%`;
+                percentage.innerText = `${(fullCups / totalCups) * 100}%`;
+            }
+
+            if (fullCups === totalCups) {
+                remained.style.visibility = 'hidden';
+                remained.style.height = 0;
+            } else {
+                remained.style.visibility = 'visible';
+                liters.innerText = `${(totalWater - totalLiters).toFixed(2)} L`;
+            }
+        }
+
+        function checkCompletion() {
+            if (drinkCount === totalCups) {
+                completionMessage.classList.add('show');
+                percentage.classList.add('completed');
+                setTimeout(() => {
+                    completionMessage.classList.remove('show');
+                    percentage.classList.remove('completed');
+                }, 3000);
+            }
+        }
+
+        // Notification functionality
+        function showNotification() {
+            if (Notification.permission === "granted") {
+                const notification = new Notification("Hydration Reminder", {
+                    body: "Time to drink water!",
+                    icon: "https://illustoon.com/photo/4506.png"
+                });
+            }
+        }
+
+        function requestNotificationPermission() {
+            if (Notification.permission !== "granted") {
+                Notification.requestPermission().then(permission => {
+                    if (permission === "granted") {
+                        setInterval(() => {
+                            if (drinkCount < totalCups) {
+                                showNotification();
+                            }
+                        }, 2 * 60 * 60 * 1000); // Every 2 hours
+                    }
+                });
+            }
+        }
+
+        // Test Notification Button
+        const testNotificationButton = document.getElementById('testNotificationButton');
+        testNotificationButton.addEventListener('click', showNotification);
+
+        requestNotificationPermission();
+    </script>
+</body>
+
+</html>
