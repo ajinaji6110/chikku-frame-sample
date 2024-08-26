@@ -345,7 +345,6 @@
         const percentage = document.getElementById("percentage");
         const remained = document.getElementById("remained");
         const completionMessage = document.getElementById("completionMessage");
-        const notifyButton = document.getElementById("notifyButton");
 
         const loadSavedData = () => {
             const savedDate = localStorage.getItem('waterTrackerDate');
@@ -386,41 +385,69 @@
         };
 
         const highlightCups = (index) => {
-            if (index === 7 && smallCups[index].classList.contains("full")) index--;
-            if (smallCups[index].classList.contains("full") && !smallCups[index].nextElementSibling?.classList.contains("full")) {
+            if (index === 7 && smallCups[index] && smallCups[index].classList.contains("full")) {
                 index--;
             }
+
+            if (smallCups[index] && smallCups[index].classList.contains("full") && !smallCups[index].nextElementSibling?.classList.contains("full")) {
+                index--;
+            }
+
             smallCups.forEach((cup, index2) => {
-                if (index2 <= index) cup.classList.add("full");
-                else cup.classList.remove("full");
+                if (index2 <= index) {
+                    cup.classList.add("full");
+                } else {
+                    cup.classList.remove("full");
+                }
             });
+
             localStorage.setItem('fullCups', (index + 1).toString());
             updateBigCup();
         };
 
-        smallCups.forEach((cup, index) => cup.addEventListener("click", () => highlightCups(index)));
+        smallCups.forEach((cup, index) => {
+            if (cup) {
+                cup.addEventListener("click", () => highlightCups(index));
+            }
+        });
 
         const savedFullCups = loadSavedData();
         highlightCups(savedFullCups - 1);
         updateBigCup();
 
-        // Notification Setup
+        // Notification Code
+        const notifyButton = document.getElementById("notifyButton");
+
         const showNotification = () => {
+            if (!("Notification" in window)) {
+                console.log("This browser does not support desktop notifications.");
+                alert("This browser does not support desktop notifications.");
+                return;
+            }
+
             if (Notification.permission === "granted") {
                 new Notification("Hydration Tracker", {
                     body: "This is your notification test!",
                     icon: "https://image.shutterstock.com/image-vector/water-icon-template-design-260nw-1387025292.jpg"
                 });
-            } else if (Notification.permission !== "denied") {
+            } else if (Notification.permission === "default") {
                 Notification.requestPermission().then(permission => {
                     if (permission === "granted") {
                         showNotification();
+                    } else {
+                        console.log("Notification permission denied.");
+                        alert("Notification permission denied. Please allow notifications to see them.");
                     }
                 });
+            } else {
+                console.log("Notification permission denied.");
+                alert("Notification permission denied. Please allow notifications to see them.");
             }
         };
 
-        notifyButton.addEventListener("click", showNotification);
+        if (notifyButton) {
+            notifyButton.addEventListener("click", showNotification);
+        }
     </script>
 </body>
 
