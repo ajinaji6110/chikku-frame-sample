@@ -336,15 +336,17 @@
             <div class="cup cup-small">250 ml</div>
         </div>
         <!-- Notification Test Button -->
-        <button class="notify-button" id="notifyButton">Test Notification 2</button>
+        <button id="testNotificationButton">Test Noti</button>
+        
     </div>
     <div class="completion-message" id="completionMessage">You reached your goal!</div>
-  <script>
+    <script>
         const smallCups = document.querySelectorAll(".cup-small");
         const liters = document.getElementById("liters");
         const percentage = document.getElementById("percentage");
         const remained = document.getElementById("remained");
         const completionMessage = document.getElementById("completionMessage");
+        const notifyButton = document.getElementById("notifyButton");
 
         const loadSavedData = () => {
             const savedDate = localStorage.getItem('waterTrackerDate');
@@ -385,73 +387,52 @@
         };
 
         const highlightCups = (index) => {
-            if (index === 7 && smallCups[index] && smallCups[index].classList.contains("full")) {
+            if (index === 7 && smallCups[index].classList.contains("full")) index--;
+            if (smallCups[index].classList.contains("full") && !smallCups[index].nextElementSibling?.classList.contains("full")) {
                 index--;
             }
-
-            if (smallCups[index] && smallCups[index].classList.contains("full") && !smallCups[index].nextElementSibling?.classList.contains("full")) {
-                index--;
-            }
-
             smallCups.forEach((cup, index2) => {
-                if (index2 <= index) {
-                    cup.classList.add("full");
-                } else {
-                    cup.classList.remove("full");
-                }
+                if (index2 <= index) cup.classList.add("full");
+                else cup.classList.remove("full");
             });
-
             localStorage.setItem('fullCups', (index + 1).toString());
             updateBigCup();
         };
 
-        smallCups.forEach((cup, index) => {
-            if (cup) {
-                cup.addEventListener("click", () => highlightCups(index));
-            }
-        });
+        smallCups.forEach((cup, index) => cup.addEventListener("click", () => highlightCups(index)));
 
         const savedFullCups = loadSavedData();
         highlightCups(savedFullCups - 1);
         updateBigCup();
 
-        // Notification Code
-        const notifyButton = document.getElementById("notifyButton");
-
-        const showNotification = () => {
-            console.log("Notification function triggered.");
-            if (!("Notification" in window)) {
-                console.log("This browser does not support desktop notifications.");
-                alert("This browser does not support desktop notifications.");
-                return;
-            }
-
+       // Notification functionality
+       function showNotification() {
             if (Notification.permission === "granted") {
-                console.log("Notification permission granted.");
-                new Notification("Hydration Tracker", {
-                    body: "This is your notification test!",
-                    icon: "https://image.shutterstock.com/image-vector/water-icon-template-design-260nw-1387025292.jpg"
+                const notification = new Notification("Hydration Reminder", {
+                    body: "Time to drink water!",
+                    icon: "https://image.flaticon.com/icons/png/512/892/892281.png"
                 });
-            } else if (Notification.permission === "default") {
-                console.log("Requesting notification permission.");
+            }
+        }
+
+        function requestNotificationPermission() {
+            if (Notification.permission !== "granted") {
                 Notification.requestPermission().then(permission => {
                     if (permission === "granted") {
-                        console.log("Notification permission granted after request.");
-                        showNotification();
-                    } else {
-                        console.log("Notification permission denied.");
-                        alert("Notification permission denied. Please allow notifications to see them.");
+                        setInterval(() => {
+                            if (drinkCount < totalCups) {
+                                showNotification();
+                            }
+                        }, 2 * 60 * 60 * 1000); // Every 2 hours
                     }
                 });
-            } else {
-                console.log("Notification permission denied.");
-                alert("Notification permission denied. Please allow notifications to see them.");
             }
-        };
-
-        if (notifyButton) {
-            notifyButton.addEventListener("click", showNotification);
         }
+        const testNotificationButton = document.getElementById('testNotificationButton');
+        testNotificationButton.addEventListener('click', showNotification);
+
+
+        requestNotificationPermission();
     </script>
 </body>
 
